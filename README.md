@@ -1,0 +1,2 @@
+# singletab
+Automagic Tab Declutterer
