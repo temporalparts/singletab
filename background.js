@@ -1,12 +1,32 @@
+
+function getPatterns(storedPatterns) {
+    return [];
+}
+
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     chrome.pageAction.show(tabId);
     if (changeInfo.status === "complete") {
-        chrome.storage.sync.get('isPaused', function(data) {
+        chrome.storage.sync.get(['isPaused', 'disableExactMatch', 'urlPatterns'], function(data) {
+            console.log(data);
             if (data.isPaused) {
                 return;
             }
             console.log(tab.url);
-            chrome.tabs.query({url: tab.url}, function(tabs) {
+
+            queryUrl = [];
+            if (!data.disableExactMatch) {
+                queryUrl.push(tab.url);
+            }
+
+            queryUrl = queryUrl.concat(getPatterns(data.urlPatterns));
+
+            console.log(queryUrl);
+
+            if (queryUrl.length === 0) {
+                return;
+            }
+
+            chrome.tabs.query({url: queryUrl}, function(tabs) {
                 tabsToRemove = [];
                 for (t of tabs) {
                     if (tab.id !== t.id) {
@@ -38,4 +58,5 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 
 chrome.tabs.onActivated.addListener(function(tabId, changeInfo, tab) {
     chrome.pageAction.show(tabId);
+    console.log('hi');
 });
